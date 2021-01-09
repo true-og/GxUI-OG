@@ -58,7 +58,7 @@ public abstract class GUIBase implements Listener {
 
         openSound = null;
 
-        errorSound = Sound.ITEM_BREAK;
+        errorSound = Sound.ENTITY_ITEM_BREAK;
         errorSoundFloat = (float) 0.6;
 
         itemErrors = new HashMap<>();
@@ -126,8 +126,7 @@ public abstract class GUIBase implements Listener {
 
                     for (Map.Entry<Integer, GUIItem> i : inventoryContents.entrySet()) {
                         if (itemErrors.containsKey(i.getKey())) {
-                            GUIItem error = new GUIItem(Material.STAINED_GLASS_PANE, 1, "§c§lERROR");
-                            error.type((short) 14);
+                            GUIItem error = new GUIItem(Material.RED_STAINED_GLASS_PANE, 1, "§c§lERROR");
                             ArrayList<String> errorLore = addLinebreaks(itemErrors.get(i.getKey()), 30, "§7");
                             error.lore(errorLore);
 
@@ -169,7 +168,7 @@ public abstract class GUIBase implements Listener {
     }
 
     private ItemStack fillSlot() {
-        ItemStack i = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7);
+        ItemStack i = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1);
         ItemMeta m = i.getItemMeta();
         m.setDisplayName(" ");
         i.setItemMeta(m);
@@ -191,14 +190,15 @@ public abstract class GUIBase implements Listener {
             return;
 
         if (invName.equalsIgnoreCase(inventoryName)) {
-            if (item == null || !item.hasItemMeta() || item.getItemMeta().getDisplayName().equalsIgnoreCase(" ") && errorSound != null) {
-                player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
+            if (item == null || !item.hasItemMeta() || item.getItemMeta().getDisplayName().equalsIgnoreCase(" ")) {
+                if (errorSound != null)
+                    player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
                 event.setCancelled(true);
                 return;
             }
 
             if (itemErrors.containsKey(event.getSlot())) {
-                player.playSound(player.getLocation(), Sound.NOTE_BASS, 100f, 0.7f);
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
                 event.setCancelled(true);
                 return;
             }
@@ -236,7 +236,7 @@ public abstract class GUIBase implements Listener {
         itemErrors.put(item, error);
         itemTimings.put(item, 0);
         if (sound)
-            player.playSound(player.getLocation(), Sound.NOTE_BASS, 100f, 0.7f);
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
     }
 
     public ArrayList<String> addLinebreaks(String input, int maxLineLength, String toAppendAfterNewline) {

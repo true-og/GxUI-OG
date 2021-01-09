@@ -71,32 +71,41 @@ public class GUIItem {
         playErrorSound = true;
     }
 
+    /**
+     * @deprecated names dont make for good identifiers
+     * @return ItemStack
+     */
     public ItemStack build() {
         ItemStack i;
-        if (!isSkull) {
-            if (type != -1)
-                i = new ItemStack(item, amount, type);
-            else
+        try {
+            if (!isSkull) {
+                if (type != -1)
+                    i = new ItemStack(item, amount); //TODO: shorts
+                else
+                    i = new ItemStack(item, amount);
+                ItemMeta m = i.getItemMeta();
+                if (!displayName.equals("Not Set"))
+                    m.setDisplayName(displayName);
+                m.setLore(lore);
+
+                if (!enchantments.isEmpty())
+                    for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet())
+                        m.addEnchant(e.getKey(), e.getValue(), true);
+
+                i.setItemMeta(m);
+            } else {
                 i = new ItemStack(item, amount);
-            ItemMeta m = i.getItemMeta();
-            if (!displayName.equals("Not Set"))
-                m.setDisplayName(displayName);
-            m.setLore(lore);
+                SkullMeta m = (SkullMeta) i.getItemMeta();
+                m.setOwner(skullOwner);
+                if (!displayName.equals("Not Set"))
+                    m.setDisplayName(displayName);
+                m.setLore(lore);
 
-            if (!enchantments.isEmpty())
-                for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet())
-                    m.addEnchant(e.getKey(), e.getValue(), true);
-
-            i.setItemMeta(m);
-        } else {
-            i = new ItemStack(item, amount, (short) 3);
-            SkullMeta m = (SkullMeta) i.getItemMeta();
-            m.setOwner(skullOwner);
-            if (!displayName.equals("Not Set"))
-                m.setDisplayName(displayName);
-            m.setLore(lore);
-
-            i.setItemMeta(m);
+                i.setItemMeta(m);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ItemStack(Material.DIRT);
         }
 
         return i;
