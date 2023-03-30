@@ -1,4 +1,4 @@
-package me.gabriella.gabsgui;
+package uk.hotten.gxui;
 
 public abstract interface GUIButton {
 

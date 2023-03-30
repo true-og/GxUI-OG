@@ -1,4 +1,4 @@
-package me.gabriella.gabsgui;
+package uk.hotten.gxui;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -72,7 +72,6 @@ public class GUIItem {
     }
 
     /**
-     * @deprecated names dont make for good identifiers
      * @return ItemStack
      */
     public ItemStack build() {

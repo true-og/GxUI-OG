@@ -1,4 +1,4 @@
-package me.gabriella.gabsgui;
+package uk.hotten.gxui;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
