@@ -135,4 +135,8 @@ public class GUIItem {
         enchantments.put(ench, level);
         return this;
     }
+
+    public GUIItem duplicateByConstructor() {
+        return new GUIItem(item, amount, displayName);
+    }
 }

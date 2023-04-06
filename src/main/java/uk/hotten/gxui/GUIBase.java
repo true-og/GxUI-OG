@@ -224,8 +224,10 @@ public abstract class GUIBase implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void close(InventoryCloseEvent event) {
+        Player closer = (Player) event.getPlayer();
+
         if (event.getView().getTitle().equalsIgnoreCase(inventoryName) && isOpen) {
-            if (event.getPlayer() == player) {
+            if (closer == player) {
                 HandlerList.unregisterAll(this);
                 isOpen = false;
             }
