@@ -18,6 +18,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -200,9 +202,34 @@ public abstract class GUIBase implements Listener {
 		i.setItemMeta(m);
 		return i;
 	}
+	
+	@EventHandler
+    public void onDrop(PlayerDropItemEvent event) {
+        if(event.getItemDrop().getItemStack().getItemMeta().isUnbreakable()) {
+            event.setCancelled(true);
+        }
+    }
+  
+	/*@EventHandler
+    public void inventoryClickHandler(InventoryClickEvent e) {
+        Player p = (Player) e.getWhoClicked();
+        Inventory i = e.getClickedInventory();
+        if(e.getCurrentItem().getItemMeta().isUnbreakable()) {
+            if(i.getTitle() != p.getInventory().getTitle()) {
+                e.setCancelled(true);
+            }
+        }
+    }*/
+
+    @EventHandler
+    public void inventoryDragHandler(InventoryDragEvent event) {
+        if(event.getCursor().getItemMeta().isUnbreakable()) {
+            event.setCancelled(true);
+        }
+    }
 
 	@EventHandler
-	public void handle(InventoryClickEvent event) {
+	public void playerInventoryClickHandler(InventoryClickEvent event) {
 		Player clickedPlayer = (Player) event.getWhoClicked();
 		ClickType clickType = event.getClick();
 		Inventory inventory = event.getClickedInventory();
@@ -217,15 +244,15 @@ public abstract class GUIBase implements Listener {
 			return;
 
 		if (inventoryTitleText.equalsIgnoreCase(inventoryName.examinableName())) {
-			if (item == null || ! item.hasItemMeta() || item.getItemMeta().displayName().examinableName().equalsIgnoreCase(" ")) {
+			if (item == null || ! item.hasItemMeta() || item.getItemMeta().displayName().equals(LegacyComponentSerializer.legacyAmpersand().deserialize(" "))) {
 				if (errorSound != null)
-					player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
+					player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
 				event.setCancelled(true);
 				return;
 			}
 
 			if (itemErrors.containsKey(event.getSlot())) {
-				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 50f, 0.7f);
 				event.setCancelled(true);
 				return;
 			}
@@ -236,7 +263,7 @@ public abstract class GUIBase implements Listener {
 
 				if (! guiItem.isButton()) {
 					if (guiItem.isPlayErrorSound() && errorSound != null)
-						player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
+						player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
 						event.setCancelled(true);
 					return;
 				}

@@ -105,7 +105,7 @@ public class GUIItem {
                 if (!displayName.equals("Not Set"))
                     m.displayName(displayNameTextComponent);
                 m.lore(loreTextComponent);
-
+                i.setUnbreakable(true);
                 i.setItemMeta(m);
             }
         } catch (Exception e) {
