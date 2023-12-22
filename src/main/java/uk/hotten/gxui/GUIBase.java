@@ -1,6 +1,11 @@
 package uk.hotten.gxui;
 
-import lombok.Getter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,254 +19,278 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.StringTokenizer;
+import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public abstract class GUIBase implements Listener {
 
-    private JavaPlugin plugin;
+	private JavaPlugin plugin;
 
-    private HashMap<Integer, GUIItem> inventoryContents;
+	private HashMap<Integer, GUIItem> inventoryContents;
 
-    @Getter private String inventoryName;
-    @Getter private int inventorySize;
-    @Getter private boolean fillEmpty;
+	@Getter private String inventoryName;
+	@Getter private int inventorySize;
+	@Getter private boolean fillEmpty;
 
-    @Getter private Sound openSound;
-    @Getter private float openSoundFloat;
-    @Getter private Sound errorSound;
-    @Getter private float errorSoundFloat;
+	@Getter private Sound openSound;
+	@Getter private float openSoundFloat;
+	@Getter private Sound errorSound;
+	@Getter private float errorSoundFloat;
 
-    @Getter private Player player;
+	@Getter private Player player;
 
-    private Inventory inventory;
+	private Inventory inventory;
 
-    private boolean isOpen = false; //prevents accidental un-registration from other GUIs that have the same name
+	private boolean isOpen = false; // prevents accidental un-registration from other GUIs that have the same name
 
-    private HashMap<Integer, String> itemErrors;
-    private HashMap<Integer, Integer> itemTimings;
+	private HashMap<Integer, String> itemErrors;
+	private HashMap<Integer, Integer> itemTimings;
 
-    public GUIBase(JavaPlugin plugin, Player player, String inventoryName, int inventorySize, boolean fillEmpty) {
-        this.plugin = plugin;
-        this.player = player;
-        this.inventoryName = inventoryName;
-        this.inventorySize = inventorySize;
-        this.fillEmpty = fillEmpty;
-        inventoryContents = new HashMap<>();
+	public GUIBase(JavaPlugin plugin, Player player, String inventoryName, int inventorySize, boolean fillEmpty) {
+		this.plugin = plugin;
+		this.player = player;
+		this.inventoryName = inventoryName;
+		this.inventorySize = inventorySize;
+		this.fillEmpty = fillEmpty;
+		inventoryContents = new HashMap<>();
 
-        openSound = null;
+		openSound = null;
 
-        errorSound = Sound.ENTITY_ITEM_BREAK;
-        errorSoundFloat = (float) 0.6;
+		errorSound = Sound.ENTITY_ITEM_BREAK;
+		errorSoundFloat = (float) 0.6;
 
-        itemErrors = new HashMap<>();
-        itemTimings = new HashMap<>();
-    }
+		itemErrors = new HashMap<>();
+		itemTimings = new HashMap<>();
+	}
 
-    public GUIBase(JavaPlugin plugin, Player player, String inventoryName, int inventorySize, boolean fillEmpty, Sound openSound, float openSoundFloat, Sound errorSound, float errorSoundFloat) {
-        this.plugin = plugin;
-        this.player = player;
-        this.inventoryName = inventoryName;
-        this.inventorySize = inventorySize;
-        this.fillEmpty = fillEmpty;
-        inventoryContents = new HashMap<>();
+	public GUIBase(JavaPlugin plugin, Player player, String inventoryName, int inventorySize, boolean fillEmpty, Sound openSound, float openSoundFloat, Sound errorSound, float errorSoundFloat) {
+		this.plugin = plugin;
+		this.player = player;
+		this.inventoryName = inventoryName;
+		this.inventorySize = inventorySize;
+		this.fillEmpty = fillEmpty;
+		inventoryContents = new HashMap<>();
 
-        this.openSound = openSound;
-        this.openSoundFloat = openSoundFloat;
+		this.openSound = openSound;
+		this.openSoundFloat = openSoundFloat;
 
-        this.errorSound = errorSound;
-        this.errorSoundFloat = errorSoundFloat;
+		this.errorSound = errorSound;
+		this.errorSoundFloat = errorSoundFloat;
 
-        itemErrors = new HashMap<>();
-        itemTimings = new HashMap<>();
-    }
+		itemErrors = new HashMap<>();
+		itemTimings = new HashMap<>();
+	}
 
-    public void open(boolean refresh) {
-        if (!isOpen)
-            Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-        if (openSound != null)
-            player.playSound(player.getLocation(), openSound, 100f, openSoundFloat);
-        isOpen = true;
-        inventory = Bukkit.getServer().createInventory(null, inventorySize, inventoryName);
+	public void open(boolean refresh) {
+		if (! isOpen)
+			Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+		if (openSound != null)
+			player.playSound(player.getLocation(), openSound, 100f, openSoundFloat);
+		isOpen = true;
 
-        inventoryContents.clear();
-        setupItems();
+		Inventory playersInventory = player.getInventory();
+		InventoryHolder inventoryContainer = playersInventory.getHolder(false);
+		TextComponent nameHandler = LegacyComponentSerializer.legacyAmpersand().deserialize(inventoryName);
+		inventory = Bukkit.createInventory(inventoryContainer, inventorySize, nameHandler);
 
-        for (Map.Entry<Integer, GUIItem> i : inventoryContents.entrySet()) {
-            inventory.setItem(i.getKey(), i.getValue().build());
-        }
+		inventoryContents.clear();
+		setupItems();
 
-        if (fillEmpty) {
-            for (int i = 0; i<inventorySize; i++) {
-                if (inventory.getItem(i) == null) {
-                    inventory.setItem(i, fillSlot());
-                }
-            }
-        }
+		for (Map.Entry<Integer, GUIItem> i : inventoryContents.entrySet()) {
+			inventory.setItem(i.getKey(), i.getValue().build());
+		}
 
-        player.openInventory(inventory);
+		if (fillEmpty) {
+			for (int i = 0; i < inventorySize; i++) {
+				if (inventory.getItem(i) == null) {
+					inventory.setItem(i, fillSlot());
+				}
+			}
+		}
 
-        if (refresh) {
-            new BukkitRunnable() {
+		player.openInventory(inventory);
 
-                @Override
-                public void run() {
-                    Inventory inv = ((HumanEntity) player).getOpenInventory().getTopInventory();
+		if (refresh) {
+			new BukkitRunnable() {
 
-                    if (!player.getOpenInventory().getTitle().equalsIgnoreCase(inventoryName)) {
-                        cancel();
-                        return;
-                    }
+				@Override
+				public void run() {
+					Inventory inventory = ((HumanEntity) player).getOpenInventory().getTopInventory();
+					Component inventoryTitle = player.getOpenInventory().title();
+					String inventoryTitleText = inventoryTitle.examinableName();
+					if (! inventoryTitleText.equalsIgnoreCase(inventoryName)) {
+						cancel();
+						return;
+					}
 
-                    inv.clear();
-                    inventoryContents.clear();
-                    setupItems();
+					inventory.clear();
+					inventoryContents.clear();
+					setupItems();
+					int counter = 0;
+					for (Map.Entry<Integer, GUIItem> i : inventoryContents.entrySet()) {
+						if (itemErrors.containsKey(i.getKey())) {
 
-                    for (Map.Entry<Integer, GUIItem> i : inventoryContents.entrySet()) {
-                        if (itemErrors.containsKey(i.getKey())) {
-                            GUIItem error = new GUIItem(Material.RED_STAINED_GLASS_PANE, 1, "§c§lERROR");
-                            ArrayList<String> errorLore = addLinebreaks(itemErrors.get(i.getKey()), 30, "§7");
-                            error.lore(errorLore);
+							GUIItem error = new GUIItem(Material.RED_STAINED_GLASS_PANE, 1, addLinebreaks(itemErrors.get(i.getKey()), 30, "&7").get(counter), "&c&lERROR");
 
+							counter++;
+							int tick = itemTimings.get(i.getKey());
+							tick++;
+							itemTimings.remove(i.getKey());
+							itemTimings.put(i.getKey(), tick);
 
-                            int tick = itemTimings.get(i.getKey());
-                            tick++;
-                            itemTimings.remove(i.getKey());
-                            itemTimings.put(i.getKey(), tick);
+							if (tick >= 9) {
+								itemErrors.remove(i.getKey());
+								itemTimings.remove(i.getKey());
+								inventory.setItem(i.getKey(), i.getValue().build());
+								continue;
+							}
 
-                            if (tick >= 9) {
-                                itemErrors.remove(i.getKey());
-                                itemTimings.remove(i.getKey());
-                                inventory.setItem(i.getKey(), i.getValue().build());
-                                continue;
-                            }
+							inventory.setItem(i.getKey(), error.build());
 
-                            inventory.setItem(i.getKey(), error.build());
-                            continue;
-                        }
-                        inv.setItem(i.getKey(), i.getValue().build());
-                    }
+							continue;
 
-                    if (fillEmpty) {
-                        for (int i = 0; i<inventorySize; i++) {
-                            if (inventory.getItem(i) == null) {
-                                inventory.setItem(i, fillSlot());
-                            }
-                        }
-                    }
-                }
-            }.runTaskTimer(plugin, 0, 5);
-        }
-    }
+						}
 
-    public abstract void setupItems();
+						inventory.setItem(i.getKey(), i.getValue().build());
 
-    public void addItem(Integer slot, GUIItem item) {
-        inventoryContents.put(slot, item);
-    }
+					}
 
-    private ItemStack fillSlot() {
-        ItemStack i = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1);
-        ItemMeta m = i.getItemMeta();
-        m.setDisplayName(" ");
-        i.setItemMeta(m);
-        return i;
-    }
+					if (fillEmpty) {
+						for (int i = 0; i<inventorySize; i++) {
+							if (inventory.getItem(i) == null) {
+								inventory.setItem(i, fillSlot());
+							}
+						}
+					}
+				}
+			}.runTaskTimer(plugin, 0, 5);
+		}
+	}
 
-    @EventHandler
-    public void handle(InventoryClickEvent event) {
-        Player clickedPlayer = (Player) event.getWhoClicked();
-        ClickType clickType = event.getClick();
-        Inventory inventory = event.getClickedInventory();
-        ItemStack item = event.getCurrentItem();
-        String invName = event.getView().getTitle();
+	public abstract void setupItems();
 
-        if (clickedPlayer != player)
-            return;
+	public static ArrayList<TextComponent> convertToTextComponents(List<String> stringList) {
+		ArrayList<TextComponent> textComponents = new ArrayList<>();
 
-        if (inventory == null)
-            return;
+		for (String str : stringList) {
+			TextComponent textComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(str);
+			textComponents.add(textComponent);
+		}
 
-        if (invName.equalsIgnoreCase(inventoryName)) {
-            if (item == null || !item.hasItemMeta() || item.getItemMeta().getDisplayName().equalsIgnoreCase(" ")) {
-                if (errorSound != null)
-                    player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
-                event.setCancelled(true);
-                return;
-            }
+		return textComponents;
+	}
 
-            if (itemErrors.containsKey(event.getSlot())) {
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
-                event.setCancelled(true);
-                return;
-            }
+	public void addItem(Integer slot, GUIItem item) {
+		inventoryContents.put(slot, item);
+	}
 
-            if (inventoryContents.containsKey(event.getSlot())) {
-                GUIItem guiItem = inventoryContents.get(event.getSlot());
-                event.setCancelled(true);
+	private ItemStack fillSlot() {
+		ItemStack i = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1);
+		ItemMeta m = i.getItemMeta();
+		TextComponent emptySlotDisplayName = LegacyComponentSerializer.legacyAmpersand().deserialize(" ");
+		m.displayName(emptySlotDisplayName);
+		i.setItemMeta(m);
+		return i;
+	}
 
-                if (!guiItem.isButton()) {
-                    if (guiItem.playErrorSound() && errorSound != null)
-                        player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
-                    return;
-                }
+	@EventHandler
+	public void handle(InventoryClickEvent event) {
+		Player clickedPlayer = (Player) event.getWhoClicked();
+		ClickType clickType = event.getClick();
+		Inventory inventory = event.getClickedInventory();
+		ItemStack item = event.getCurrentItem();
+		Component inventoryName = event.getView().title();
+		String inventoryTitleText = inventoryName.examinableName();
 
-                boolean exec = guiItem.executeClick(clickType);
-                if (!exec) {
-                    if (guiItem.playErrorSound() && errorSound != null)
-                        player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
-                }
-            }
-        }
-    }
+		if (clickedPlayer != player)
+			return;
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void close(InventoryCloseEvent event) {
-        Player closer = (Player) event.getPlayer();
+		if (inventory == null)
+			return;
 
-        if (event.getView().getTitle().equalsIgnoreCase(inventoryName) && isOpen) {
-            if (closer == player) {
-                HandlerList.unregisterAll(this);
-                isOpen = false;
-            }
-        }
-    }
+		if (inventoryTitleText.equalsIgnoreCase(inventoryName.examinableName())) {
+			if (item == null || ! item.hasItemMeta() || item.getItemMeta().displayName().examinableName().equalsIgnoreCase(" ")) {
+				if (errorSound != null)
+					player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
+				event.setCancelled(true);
+				return;
+			}
 
-    public void showErrorItem(Player player, Integer item, String error, boolean sound) {
-        itemErrors.put(item, error);
-        itemTimings.put(item, 0);
-        if (sound)
-            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
-    }
+			if (itemErrors.containsKey(event.getSlot())) {
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
+				event.setCancelled(true);
+				return;
+			}
 
-    public ArrayList<String> addLinebreaks(String input, int maxLineLength, String toAppendAfterNewline) {
-        ArrayList<String> result = new ArrayList<>();
+			if (inventoryContents.containsKey(event.getSlot())) {
+				GUIItem guiItem = inventoryContents.get(event.getSlot());
+				event.setCancelled(true);
 
-        StringTokenizer tok = new StringTokenizer(input, " ");
-        StringBuilder output = new StringBuilder();
-        output.insert(0, toAppendAfterNewline);
-        int lineLen = 0;
-        while (tok.hasMoreTokens()) {
-            String word = tok.nextToken();
+				if (! guiItem.isButton()) {
+					if (guiItem.isPlayErrorSound() && errorSound != null)
+						player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
+						event.setCancelled(true);
+					return;
+				}
 
-            if (lineLen + word.length() > maxLineLength) {
-                result.add(output.toString());
-                output = new StringBuilder();
-                output.append(toAppendAfterNewline);
-                lineLen = 0;
-            }
-            output.append(word).append(" ");
-            lineLen += word.length();
-        }
-        result.add(output.toString());
+				boolean exec = guiItem.executeClick(clickType);
+				if (! exec) {
+					if (guiItem.isPlayErrorSound() && errorSound != null)
+						player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
+				}
+			}
+		}
+	}
 
-        return result;
-    }
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void close(InventoryCloseEvent event) {
+		Player closer = (Player) event.getPlayer();
+		Component inventoryTitle = player.getOpenInventory().title();
+		String inventoryTitleText = inventoryTitle.examinableName();
+		if (inventoryTitleText.equalsIgnoreCase(inventoryName) && isOpen) {
+			if (closer == player) {
+				HandlerList.unregisterAll(this);
+				isOpen = false;
+			}
+		}
+	}
+
+	public void showErrorItem(Player player, Integer item, String error, boolean sound) {
+		itemErrors.put(item, error);
+		itemTimings.put(item, 0);
+		if (sound)
+			player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
+	}
+
+	public ArrayList<String> addLinebreaks(String input, int maxLineLength, String toAppendAfterNewline) {
+		ArrayList<String> result = new ArrayList<>();
+
+		StringTokenizer tok = new StringTokenizer(input, " ");
+		StringBuilder output = new StringBuilder();
+		output.insert(0, toAppendAfterNewline);
+		int lineLen = 0;
+		while (tok.hasMoreTokens()) {
+			String word = tok.nextToken();
+
+			if (lineLen + word.length() > maxLineLength) {
+				result.add(output.toString());
+				output = new StringBuilder();
+				output.append(toAppendAfterNewline);
+				lineLen = 0;
+			}
+			output.append(word).append(" ");
+			lineLen += word.length();
+		}
+		result.add(output.toString());
+
+		return result;
+	}
 }
