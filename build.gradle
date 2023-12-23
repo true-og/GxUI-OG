@@ -14,7 +14,7 @@ java {
 
 }
 
-group = "com.hotten.gxgui" // Declare bundle identifier.
+group = "uk.hotten.gxui" // Declare bundle identifier.
 version = "1.1" // Declare plugin version (will be in .jar).
 
 def apiVersion = "1.19" // Declare minecraft server target version.
@@ -99,7 +99,7 @@ tasks.withType(JavaCompile).configureEach {
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = 'com.hotten.gxgui'
+            groupId = 'uk.hotten.gxui'
             artifactId = 'gxgui'
             version = '1.1'
 
