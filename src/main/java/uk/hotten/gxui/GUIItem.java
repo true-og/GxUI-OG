@@ -1,8 +1,11 @@
 package uk.hotten.gxui;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.ClickType;
@@ -10,9 +13,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 @Accessors(fluent = true)
 public class GUIItem {
@@ -76,17 +81,18 @@ public class GUIItem {
      */
     public ItemStack build() {
         ItemStack i;
+        TextComponent displayNameTextComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(displayName);
+        List<TextComponent> loreTextComponent = GUIBase.convertToTextComponents(lore);
         try {
-            if (!isSkull) {
+            if (! isSkull) {
                 if (type != -1)
-                    i = new ItemStack(item, amount); //TODO: shorts
+                    i = new ItemStack(item, amount); // TODO: shorts?
                 else
                     i = new ItemStack(item, amount);
                 ItemMeta m = i.getItemMeta();
-                if (!displayName.equals("Not Set"))
-                    m.setDisplayName(displayName);
-                m.setLore(lore);
-
+                if (! displayName.equals("Not Set"))
+                    m.displayName(displayNameTextComponent);
+                m.lore(loreTextComponent);
                 if (!enchantments.isEmpty())
                     for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet())
                         m.addEnchant(e.getKey(), e.getValue(), true);
@@ -95,11 +101,11 @@ public class GUIItem {
             } else {
                 i = new ItemStack(item, amount);
                 SkullMeta m = (SkullMeta) i.getItemMeta();
-                m.setOwner(skullOwner);
+                m.setOwningPlayer(Bukkit.getOfflinePlayer(skullOwner));
                 if (!displayName.equals("Not Set"))
-                    m.setDisplayName(displayName);
-                m.setLore(lore);
-
+                    m.displayName(displayNameTextComponent);
+                m.lore(loreTextComponent);
+                i.setUnbreakable(true);
                 i.setItemMeta(m);
             }
         } catch (Exception e) {
@@ -110,7 +116,15 @@ public class GUIItem {
         return i;
     }
 
-    public boolean isButton() {
+    public boolean isPlayErrorSound() {
+		return playErrorSound;
+	}
+
+	public void setPlayErrorSound(boolean playErrorSound) {
+		this.playErrorSound = playErrorSound;
+	}
+
+	public boolean isButton() {
         return !(button == null);
     }
 
