@@ -1,0 +1,8 @@
+name: Template-OG
+author: NotAlexNoyle
+description: A blank plugin for TrueOG from which to base other plugins off of.
+website: https://github.com/true-og/Template-OG/
+version: '1.0'
+api-version: '1.19'
+main: plugin.TemplateOG
+depend: [DiamondBankOG]

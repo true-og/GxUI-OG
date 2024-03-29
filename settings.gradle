@@ -1,0 +1,5 @@
+rootProject.name = "Template-OG"
+include ':Utilities-OG', ':GxUI', ':DiamondBank-OG' 
+project(':Utilities-OG').projectDir = file('libs/Utilities-OG')
+project(':DiamondBank-OG').projectDir = file('libs/DiamondBank-OG')
+project(':GxUI').projectDir = file('libs/GxUI') 

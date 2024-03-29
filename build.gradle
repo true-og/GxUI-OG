@@ -1,0 +1,127 @@
+plugins {
+	
+    id 'java' // Tell gradle this is a java project.
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // Import utility to package libraries into .jar file.
+    id 'eclipse' // Import eclipse plugin for IDE integration.
+    id 'org.jetbrains.kotlin.jvm' version '1.9.23' // Import kotlin jvm plugin for kotlin/java integration.
+
+}
+
+java {
+ 
+	// Declare java version.
+ 	sourceCompatibility = JavaVersion.VERSION_17
+
+}
+
+group = "net.trueog.template-og" // Declare bundle identifier.
+version = "1.0" // Declare plugin version (will be in .jar).
+
+def apiVersion = "1.19" // Declare minecraft server target version.
+
+task fetchAndBuildDependencies {
+    doLast {
+        new File('depends').eachLine { line ->
+            def components = line.split(" ") // Split the line
+            def repoUrl = components[0] 
+            def ref = components[1]
+            def localPath = components[2] 
+
+            // Update from remote
+            exec {
+                workingDir = projectDir
+                commandLine("git", "checkout", ref)
+                commandLine("git", "pull")
+            }
+
+            // Build
+            exec {
+                workingDir = projectDir 
+                commandLine("./gradlew", "build") 
+            }
+        }
+    }
+}
+
+processResources {
+
+    def props = [
+        version: version,
+        apiVersion: apiVersion,
+    ]
+
+    inputs.properties props // Indicates to rerun if version changes.
+
+    filesMatching("plugin.yml") {
+
+        expand props
+
+    }
+
+}
+
+repositories {
+
+    mavenCentral()
+
+    maven {
+
+        url "https://repo.purpurmc.org/snapshots"
+
+    }
+
+}
+
+dependencies {
+
+    compileOnly 'org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT' // Declare purpur API version to be packaged.
+    compileOnly 'io.github.miniplaceholders:miniplaceholders-api:2.2.3' // Import MiniPlaceholders API.
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8" // Declare kotlin library to be packaged.
+    implementation project(':Utilities-OG')
+    implementation project(':GxUI')
+    implementation project(':DiamondBank-OG')
+
+}
+
+shadowJar {
+
+    exclude 'io.github.miniplaceholders.*' // Exclude the MiniPlaceholders package from being shadowed.
+    
+    minimize()
+    
+}
+
+jar.dependsOn shadowJar
+
+tasks.jar.configure {
+
+    archiveClassifier = "part"
+
+}
+
+tasks.shadowJar.configure {
+
+    archiveClassifier = null
+
+}
+
+tasks.named("build") {
+
+    dependsOn("fetchAndBuildDependencies")
+    
+}
+
+processResources {
+
+    duplicatesStrategy = 'include'
+    
+}
+
+tasks.withType(JavaCompile).configureEach {
+
+    options.compilerArgs += ["-parameters"]
+    options.encoding = 'UTF-8' // Override the system character set with a universal set.
+    options.fork = true // Enable compilation in a separate daemon process.
+
+}

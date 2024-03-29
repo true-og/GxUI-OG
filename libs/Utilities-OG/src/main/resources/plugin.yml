@@ -1,0 +1,35 @@
+name: Utilities-OG
+authors: [ christianniehaus, NotAlexNoyle ]
+version: '2.1.2'
+main: me.barny1094875.utilitiesog.Utilities_OG
+api-version: 1.19
+depend: [ WorldGuard ]
+commands:
+  utilities:
+    usage: /utilites
+  togglephantoms:
+    usage: /togglephantoms
+  togglecramming:
+    usage: /togglecramming
+  ranks:
+    usage: /ranks
+  ping:
+    usage: /ping
+  bing:
+    usage: /bing
+  colorcodes:
+    usage: /colorcodes
+
+permissions:
+  utilities.togglephantoms:
+    description: Permission to use the /togglephantoms command.
+    default: op
+  utilities.togglecramming:
+    description: Permission to use the /togglecramming command.
+    default: op
+  utilities.ranks:
+    description: Permission to use the /ranks command.
+    default: op
+  utilities.ping:
+    description: Permission to use the /ping and /bing commands.
+    default: op

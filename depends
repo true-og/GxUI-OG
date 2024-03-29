@@ -1,0 +1,4 @@
+# Each line: RepoURL  Branch/Tag  LocalPath 
+https://github.com/NotAlexNoyle/Utilities-OG.git  main  ./libs/Utilities-OG
+https://github.com/Gxorge/GxUI.git  main  ./libs/GxGUI
+https://github.com/NotAlexNoyle/DiamondBank-OG ./libs/DiamondBank-OG
