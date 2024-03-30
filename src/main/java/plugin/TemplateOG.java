@@ -62,7 +62,7 @@ public class TemplateOG extends JavaPlugin {
 
 	public static double checkPlayerBalance(UUID playerUUID) {
 
-		/*DiamondBank diamondBankPlugin = Bukkit.getPluginManager().getPlugin("DiamondBankOG");
+		/*DiamondBankAPI diamondBankPlugin = Bukkit.getPluginManager().getPlugin("DiamondBankOG");
 
 		diamondBankPlugin.getPlayerBalance(playerUUID)
 		.thenAccept(balance -> {

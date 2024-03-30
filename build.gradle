@@ -21,27 +21,24 @@ def apiVersion = "1.19" // Declare minecraft server target version.
 
 task fetchAndBuildDependencies {
     doLast {
-        new File('depends').eachLine { line ->
+        if (!project.ext.has('dependenciesFetched')) { // Add a property
+            project.ext.set('dependenciesFetched', true) 
+            new File('depends').eachLine { line -> 
             def components = line.split(" ") // Split the line
             def repoUrl = components[0] 
             def ref = components[1]
-            def localPath = components[2] 
-
-            // Update from remote
-            exec {
-                workingDir = projectDir
-                commandLine("git", "checkout", ref)
-                commandLine("git", "pull")
-            }
+            def localPath = components[2]
 
             // Build
             exec {
                 workingDir = projectDir 
                 commandLine("./gradlew", "build") 
             }
+            }
         }
     }
 }
+
 
 processResources {
 
@@ -78,9 +75,10 @@ dependencies {
     compileOnly 'io.github.miniplaceholders:miniplaceholders-api:2.2.3' // Import MiniPlaceholders API.
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8" // Declare kotlin library to be packaged.
-    implementation project(':Utilities-OG')
-    implementation project(':GxUI')
-    implementation project(':DiamondBank-OG')
+    implementation project(':libs:Utilities-OG')
+    implementation project(':libs:GxUI')
+    implementation project(':libs:DiamondBank-OG')
+    
 
 }
 
@@ -104,12 +102,6 @@ tasks.shadowJar.configure {
 
     archiveClassifier = null
 
-}
-
-tasks.named("build") {
-
-    dependsOn("fetchAndBuildDependencies")
-    
 }
 
 processResources {
