@@ -36,7 +36,7 @@ public class SpectatorGui extends GUIBase {
 		for (Player p : Bukkit.getOnlinePlayers()) {
 
 			item = new GUIItem(Material.PLAYER_HEAD, 1, name.get(curr), p.getName());
-			item.button(new GUIButton() {
+			GUIButton button = new GUIButton() {
 				@Override
 				public boolean leftClick() {
 					assignedPlayer.closeInventory();
@@ -48,7 +48,10 @@ public class SpectatorGui extends GUIBase {
 				@Override public boolean rightClick() { return false; }
 				@Override public boolean rightClickShift() { return false; }
 
-			});
+			};
+			
+			item.button(button);
+			
 			addItem(curr, item);
 			curr = nextCurr(curr);
 

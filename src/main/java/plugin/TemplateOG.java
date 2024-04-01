@@ -3,8 +3,6 @@
 
 package plugin;
 
-import java.util.UUID;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +14,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.trueog.diamondbankog.DiamondBankOG;
+import net.trueog.diamondbankog.PostgreSQL.BalanceType;
 
 // Extending this class is standard bukkit boilerplate for any plugin, or else the server software won't load the classes.
 public class TemplateOG extends JavaPlugin {
@@ -43,14 +43,13 @@ public class TemplateOG extends JavaPlugin {
 
 	}
 
-	public static void registerExpansion() {
+	public  void registerExpansion() {
 		Expansion.Builder builder = Expansion.builder("diamondbank_og_balance");
 		builder.filter(Player.class);
 
 		builder.audiencePlaceholder("name", (audience, ctx, queue) -> {
 			final Player player = (Player) audience;
-			final TagResolver playerResolver = MiniPlaceholders.getAudiencePlaceholders(player);
-			Utils.diamondBankOGPlaceholderMessage(player, "&BYour balance is: " + checkPlayerBalance(player.getUniqueId()), playerResolver);
+			Utils.diamondBankOGPlaceholderMessage(player, "&BYour balance is: " + checkPlayerBalance(player));
 			TextComponent nameHandler = LegacyComponentSerializer.legacyAmpersand().deserialize(player.getName());
 			return Tag.selfClosingInserting(nameHandler);
 		}).globalPlaceholder("tps", (ctx, queue) -> Tag.selfClosingInserting(Component.text(Bukkit.getTPS()[0]))).build();
@@ -60,21 +59,26 @@ public class TemplateOG extends JavaPlugin {
 
 	}
 
-	public static double checkPlayerBalance(UUID playerUUID) {
+	public long checkPlayerBalance(Player player) {
 
-		/*DiamondBankAPI diamondBankPlugin = Bukkit.getPluginManager().getPlugin("DiamondBankOG");
+		DiamondBankOG diamondBankPlugin = new DiamondBankOG();
 
-		diamondBankPlugin.getPlayerBalance(playerUUID)
-		.thenAccept(balance -> {
-			return balance;
+		diamondBankPlugin.getPlayerBalance(player.getUniqueId(), BalanceType.BANK_BALANCE).thenAccept(balance -> {
+			
+			balance.getBankBalance();
+			
 		}).exceptionally(error -> {
+			
 			// Handle potential errors...
-			getLogger().error("Failed to get player balance", error);
+			TemplateOG.getPlugin().getLogger().info("ERROR: Failed to get player balance! " + error);
+			
+			// End task gracefully.
 			return null; 
-		});*/
+			
+		});
 		
-		return 1.0;
-
+		return 0;
+		
 	}
 
 }

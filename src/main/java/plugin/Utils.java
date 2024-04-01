@@ -3,13 +3,12 @@ package plugin;
 import org.bukkit.entity.Player;
 
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class Utils {
 
 	// Sends a formatted message to the player (including name replacement).
-	public static void diamondBankOGPlaceholderMessage(Player p, String message, TagResolver playerResolver) {
+	public static void diamondBankOGPlaceholderMessage(Player p, String message) {
 
 		p.sendMessage(legacySerializerAnyCase((message)));
 
