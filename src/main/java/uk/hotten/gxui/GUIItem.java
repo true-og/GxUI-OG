@@ -55,6 +55,14 @@ public class GUIItem {
         type = -1;
         playErrorSound = true;
     }
+    
+    public GUIItem(GUIButton item) {
+        amount = 1;
+        displayName = "Not Set";
+        lore = new ArrayList<>();
+        type = -1;
+        playErrorSound = true;
+    }
 
     public GUIItem(Material item, int amount, String displayName) {
         this.item = item;
