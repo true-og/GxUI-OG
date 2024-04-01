@@ -1,3 +1,3 @@
-# GxGUI
+# GxUI
 
-Gxorge's GUI library updated for 1.19 by https://true-og.net
+My GUI Lib. To use, use the following repo URL: `https://repo.hotten.cloud/releases`, the following package: `uk.hotten.gxui`, and artifact: `gxui:1.3.1`.

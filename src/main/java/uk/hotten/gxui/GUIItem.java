@@ -31,6 +31,7 @@ public class GUIItem {
     private String skullOwner;
 
     private HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+    @Getter @Setter private boolean unbreakable = false;
 
     @Getter @Setter private GUIButton button;
 
@@ -112,8 +113,8 @@ public class GUIItem {
                 m.setOwningPlayer(Bukkit.getOfflinePlayer(skullOwner));
                 if (!displayName.equals("Not Set"))
                     m.displayName(displayNameTextComponent);
+                i.setUnbreakable(unbreakable);
                 m.lore(loreTextComponent);
-                i.setUnbreakable(true);
                 i.setItemMeta(m);
             }
         } catch (Exception e) {
