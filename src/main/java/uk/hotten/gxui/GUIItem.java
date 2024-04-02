@@ -57,7 +57,7 @@ public class GUIItem {
         playErrorSound = true;
     }
     
-    public GUIItem(GUIButton item) {
+	public void button(GUIButton guibutton) {
         amount = 1;
         displayName = "Not Set";
         lore = new ArrayList<>();
@@ -162,4 +162,5 @@ public class GUIItem {
     public GUIItem duplicateByConstructor() {
         return new GUIItem(item, amount, displayName);
     }
+
 }
