@@ -244,7 +244,7 @@ public abstract class GUIBase implements Listener {
 			return;
 
 		if (inventoryTitleText.equalsIgnoreCase(inventoryName.examinableName())) {
-			if (item == null || ! item.hasItemMeta() || item.getItemMeta().displayName().equals(LegacyComponentSerializer.legacyAmpersand().deserialize(" "))) {
+			if (item == null || ! item.hasItemMeta()) {
 				if (errorSound != null)
 					player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
 				event.setCancelled(true);
