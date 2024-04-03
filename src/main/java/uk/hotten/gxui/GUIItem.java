@@ -57,7 +57,7 @@ public class GUIItem {
         playErrorSound = true;
     }
     
-	public void button(GUIButton guibutton) {
+	public GUIItem(GUIButton guibutton) {
         amount = 1;
         displayName = "Not Set";
         lore = new ArrayList<>();
