@@ -1,4 +1,4 @@
-package uk.hotten.gxui;
+package net.trueog.gxui;
 
 public abstract interface GUIButton {
 

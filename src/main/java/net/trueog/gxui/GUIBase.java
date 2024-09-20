@@ -1,4 +1,4 @@
-package uk.hotten.gxui;
+package net.trueog.gxui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -202,14 +202,14 @@ public abstract class GUIBase implements Listener {
 		i.setItemMeta(m);
 		return i;
 	}
-	
+
 	@EventHandler
-    public void onDrop(PlayerDropItemEvent event) {
-        if(event.getItemDrop().getItemStack().getItemMeta().isUnbreakable()) {
-            event.setCancelled(true);
-        }
-    }
-  
+	public void onDrop(PlayerDropItemEvent event) {
+		if(event.getItemDrop().getItemStack().getItemMeta().isUnbreakable()) {
+			event.setCancelled(true);
+		}
+	}
+
 	/*@EventHandler
     public void inventoryClickHandler(InventoryClickEvent e) {
         Player p = (Player) e.getWhoClicked();
@@ -221,12 +221,12 @@ public abstract class GUIBase implements Listener {
         }
     }*/
 
-    @EventHandler
-    public void inventoryDragHandler(InventoryDragEvent event) {
-        if(event.getCursor().getItemMeta().isUnbreakable()) {
-            event.setCancelled(true);
-        }
-    }
+	@EventHandler
+	public void inventoryDragHandler(InventoryDragEvent event) {
+		if(event.getCursor().getItemMeta().isUnbreakable()) {
+			event.setCancelled(true);
+		}
+	}
 
 	@EventHandler
 	public void playerInventoryClickHandler(InventoryClickEvent event) {
@@ -264,7 +264,7 @@ public abstract class GUIBase implements Listener {
 				if (! guiItem.isButton()) {
 					if (guiItem.isPlayErrorSound() && errorSound != null)
 						player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
-						event.setCancelled(true);
+					event.setCancelled(true);
 					return;
 				}
 
@@ -320,4 +320,5 @@ public abstract class GUIBase implements Listener {
 
 		return result;
 	}
+
 }

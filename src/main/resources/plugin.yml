@@ -1,7 +1,7 @@
-name: GxGUI
-author: Gxorge
-description: Gxorge's GUI library updated for 1.19 by TrueOG Network
+name: GxGUI-OG
+authors: [ Gxorge, NotAlexNoyle ]
+description: Gxorge's GUI library maintained for 1.19.4 by TrueOG Network.
 website: https://github.com/Gxorge/GxGUI
 version: '${version}'
 api-version: '${apiVersion}'
-main: uk/hotten/gxui
+main: net.trueog.gxui

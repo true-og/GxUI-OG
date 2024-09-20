@@ -11,7 +11,7 @@ java {
 }
 
 group = "net.trueog.gxui-og" // Declare bundle identifier.
-version = "1.3.2" // Declare plugin version (will be in .jar).
+version = "1.3.3" // Declare plugin version (will be in .jar).
 val apiVersion = "1.19" // Declare minecraft server target version.
 
 tasks.named<ProcessResources>("processResources") {
@@ -41,7 +41,6 @@ repositories {
 }
 
 dependencies {
-
     compileOnly("org.purpurmc.purpur:purpur-api:1.19.4-R0.1-SNAPSHOT") // Declare purpur API version to be packaged.
     compileOnly("io.github.miniplaceholders:miniplaceholders-api:2.2.3") // Import MiniPlaceholders API.
 
