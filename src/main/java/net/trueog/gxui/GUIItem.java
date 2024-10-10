@@ -16,8 +16,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import me.barny1094875.utilitiesog.UtilitiesOG;
 import net.kyori.adventure.text.TextComponent;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 @Accessors(fluent = true)
 public class GUIItem {
@@ -128,7 +128,7 @@ public class GUIItem {
 	public ItemStack build() {
 
 		ItemStack i;
-		TextComponent displayNameTextComponent = UtilitiesOG.trueogColorize(displayName);
+		TextComponent displayNameTextComponent = UtilitiesOG.trueogExpand(displayName);
 		List<TextComponent> loreTextComponent = GUIBase.convertToTextComponents(lore);
 		try {
 
