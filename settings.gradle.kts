@@ -1,4 +1,4 @@
-rootProject.name = "GxGUI-OG"
+rootProject.name = "GxUI-OG"
 
 // Execute bootstrap.sh
 exec {
