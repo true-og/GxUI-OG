@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import net.kyori.adventure.text.TextComponent;
+import net.trueog.utilitiesog.UtilitiesOG;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -13,246 +17,235 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import net.kyori.adventure.text.TextComponent;
-import net.trueog.utilitiesog.UtilitiesOG;
-
 @Accessors(fluent = true)
 public class GUIItem {
 
-	@Getter @Setter private Material item;
-	@Getter @Setter private int amount;
-	@Getter @Setter private String displayName;
-	@Getter @Setter private ArrayList<String> lore;
+    @Getter
+    @Setter
+    private Material item;
+
+    @Getter
+    @Setter
+    private int amount;
+
+    @Getter
+    @Setter
+    private String displayName;
 
-	private boolean isSkull;
-	private String skullOwner;
-	private HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+    @Getter
+    @Setter
+    private ArrayList<String> lore;
 
-	@Getter @Setter private boolean unbreakable = false;
-	@Getter @Setter private GUIButton button;
-	@Getter @Setter private short type;
-	@Getter @Setter private boolean playErrorSound;
+    private boolean isSkull;
+    private String skullOwner;
+    private HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
-	public GUIItem() {
+    @Getter
+    @Setter
+    private boolean unbreakable = false;
+
+    @Getter
+    @Setter
+    private GUIButton button;
 
-		item = Material.AIR;
-		amount = 1;
-		displayName = "Not Set";
-		lore = new ArrayList<>();
-		type = -1;
-		playErrorSound = true;
+    @Getter
+    @Setter
+    private short type;
 
-	}
+    @Getter
+    @Setter
+    private boolean playErrorSound;
 
-	public GUIItem(Material item) {
+    public GUIItem() {
 
-		this.item = item;
+        item = Material.AIR;
+        amount = 1;
+        displayName = "Not Set";
+        lore = new ArrayList<>();
+        type = -1;
+        playErrorSound = true;
+    }
 
-		amount = 1;
-		displayName = "Not Set";
-		lore = new ArrayList<>();
-		type = -1;
-		playErrorSound = true;
+    public GUIItem(Material item) {
 
-	}
+        this.item = item;
 
-	public GUIItem(GUIButton guibutton) {
+        amount = 1;
+        displayName = "Not Set";
+        lore = new ArrayList<>();
+        type = -1;
+        playErrorSound = true;
+    }
 
-		amount = 1;
-		displayName = "Not Set";
-		lore = new ArrayList<>();
-		type = -1;
-		playErrorSound = true;
+    public GUIItem(GUIButton guibutton) {
 
-	}
+        amount = 1;
+        displayName = "Not Set";
+        lore = new ArrayList<>();
+        type = -1;
+        playErrorSound = true;
+    }
 
-	public GUIItem(Material item, int amount, String displayName) {
+    public GUIItem(Material item, int amount, String displayName) {
 
-		this.item = item;
-		this.amount = amount;
-		this.displayName = displayName;
+        this.item = item;
+        this.amount = amount;
+        this.displayName = displayName;
 
-		lore = new ArrayList<>();
-		type = -1;
-		playErrorSound = true;
+        lore = new ArrayList<>();
+        type = -1;
+        playErrorSound = true;
+    }
 
-	}
+    public GUIItem(Material item, int amount, String displayName, String skullOwner) {
 
-	public GUIItem(Material item, int amount, String displayName, String skullOwner) {
+        this.item = item;
+        this.amount = amount;
+        this.displayName = displayName;
+        this.skullOwner = skullOwner;
 
-		this.item = item;
-		this.amount = amount;
-		this.displayName = displayName;
-		this.skullOwner = skullOwner;
+        isSkull = true;
+        lore = new ArrayList<>();
+        type = -1;
+        playErrorSound = true;
+    }
 
-		isSkull = true;
-		lore = new ArrayList<>();
-		type = -1;
-		playErrorSound = true;
+    public GUIItem(Material item, int amount, GUIButton button, String displayName, String skullOwner) {
 
-	}
+        this.item = item;
+        this.amount = amount;
+        this.button = button;
+        this.displayName = displayName;
+        this.skullOwner = skullOwner;
 
-	public GUIItem(Material item, int amount, GUIButton button, String displayName, String skullOwner) {
+        isSkull = true;
+        lore = new ArrayList<>();
+        type = -1;
+        playErrorSound = true;
+    }
 
-		this.item = item;
-		this.amount = amount;
-		this.button = button;
-		this.displayName = displayName;
-		this.skullOwner = skullOwner;
+    public GUIButton getButton() {
 
-		isSkull = true;
-		lore = new ArrayList<>();
-		type = -1;
-		playErrorSound = true;
+        return button;
+    }
 
-	}
+    public void setButton(GUIButton button) {
 
-	public GUIButton getButton() {
+        this.button = button;
+    }
 
-		return button;
+    /**
+     * @return ItemStack
+     */
+    public ItemStack build() {
 
-	}
+        ItemStack i;
+        TextComponent displayNameTextComponent = UtilitiesOG.trueogExpand(displayName);
+        List<TextComponent> loreTextComponent = GUIBase.convertToTextComponents(lore);
+        try {
 
-	public void setButton(GUIButton button) {
+            if (!isSkull) {
 
-		this.button = button;
+                if (type != -1) {
 
-	}
+                    // TODO: shorts?
+                    i = new ItemStack(item, amount);
 
-	/**
-	 * @return ItemStack
-	 */
-	public ItemStack build() {
+                } else {
 
-		ItemStack i;
-		TextComponent displayNameTextComponent = UtilitiesOG.trueogExpand(displayName);
-		List<TextComponent> loreTextComponent = GUIBase.convertToTextComponents(lore);
-		try {
+                    i = new ItemStack(item, amount);
+                }
 
-			if (! isSkull) {
+                ItemMeta m = i.getItemMeta();
+                if (!displayName.equals("Not Set")) {
 
-				if (type != -1) {
+                    m.displayName(displayNameTextComponent);
+                }
 
-					// TODO: shorts?
-					i = new ItemStack(item, amount);
+                m.lore(loreTextComponent);
 
-				}
-				else {
+                if (!enchantments.isEmpty()) {
 
-					i = new ItemStack(item, amount);
+                    for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet()) {
 
-				}
+                        m.addEnchant(e.getKey(), e.getValue(), true);
+                    }
+                }
 
-				ItemMeta m = i.getItemMeta();
-				if (! displayName.equals("Not Set")) {
+                i.setItemMeta(m);
 
-					m.displayName(displayNameTextComponent);
+            } else {
 
-				}
+                i = new ItemStack(item, amount);
+                SkullMeta m = (SkullMeta) i.getItemMeta();
 
-				m.lore(loreTextComponent);
+                m.setOwningPlayer(Bukkit.getOfflinePlayer(skullOwner));
 
-				if (! enchantments.isEmpty()) {
+                if (!displayName.equals("Not Set")) {
 
-					for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet()) {
+                    m.displayName(displayNameTextComponent);
+                }
 
-						m.addEnchant(e.getKey(), e.getValue(), true);
+                i.setUnbreakable(unbreakable);
+                m.lore(loreTextComponent);
+                i.setItemMeta(m);
+            }
 
-					}
+        } catch (Exception error) {
 
-				}
+            error.printStackTrace();
 
-				i.setItemMeta(m);
+            return new ItemStack(Material.DIRT);
+        }
 
-			}
-			else {
+        return i;
+    }
 
-				i = new ItemStack(item, amount);
-				SkullMeta m = (SkullMeta) i.getItemMeta();
+    public boolean isPlayErrorSound() {
 
-				m.setOwningPlayer(Bukkit.getOfflinePlayer(skullOwner));
+        return playErrorSound;
+    }
 
-				if (! displayName.equals("Not Set")) {
+    public void setPlayErrorSound(boolean playErrorSound) {
 
-					m.displayName(displayNameTextComponent);
+        this.playErrorSound = playErrorSound;
+    }
 
-				}
+    public boolean isButton() {
 
-				i.setUnbreakable(unbreakable);
-				m.lore(loreTextComponent);	
-				i.setItemMeta(m);
+        return !(button == null);
+    }
 
-			}
+    public boolean executeClick(ClickType clickType) {
 
-		}
-		catch (Exception error) {
+        switch (clickType) {
+            case LEFT:
+                return button.leftClick();
+            case SHIFT_LEFT:
+                return button.leftClickShift();
+            case RIGHT:
+                return button.rightClick();
+            case SHIFT_RIGHT:
+                return button.rightClickShift();
+            default:
+                return false;
+        }
+    }
 
-			error.printStackTrace();
+    public GUIItem enchantment(Enchantment ench, Integer level) {
 
-			return new ItemStack(Material.DIRT);
+        if (enchantments == null) {
 
-		}
+            enchantments = new HashMap<>();
+        }
 
-		return i;
+        enchantments.put(ench, level);
 
-	}
+        return this;
+    }
 
-	public boolean isPlayErrorSound() {
+    public GUIItem duplicateByConstructor() {
 
-		return playErrorSound;
-
-	}
-
-	public void setPlayErrorSound(boolean playErrorSound) {
-
-		this.playErrorSound = playErrorSound;
-
-	}
-
-	public boolean isButton() {
-
-		return ! (button == null);
-
-	}
-
-	public boolean executeClick(ClickType clickType) {
-
-		switch (clickType) {
-		case LEFT:
-			return button.leftClick();
-		case SHIFT_LEFT:
-			return button.leftClickShift();
-		case RIGHT:
-			return button.rightClick();
-		case SHIFT_RIGHT:
-			return button.rightClickShift();
-		default:
-			return false;
-		}
-
-	}
-
-	public GUIItem enchantment(Enchantment ench, Integer level) {
-
-		if (enchantments == null) {
-
-			enchantments = new HashMap<>();
-
-		}
-
-		enchantments.put(ench, level);
-
-		return this;
-
-	}
-
-	public GUIItem duplicateByConstructor() {
-
-		return new GUIItem(item, amount, displayName);
-
-	}
-
+        return new GUIItem(item, amount, displayName);
+    }
 }
