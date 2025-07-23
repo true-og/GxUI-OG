@@ -46,15 +46,6 @@ repositories {
     gradlePluginPortal()
     maven { url = uri("https://repo.purpurmc.org/snapshots") }
     maven { url = uri("file://${System.getProperty("user.home")}/.m2/repository") }
-    System.getProperty("SELF_MAVEN_LOCAL_REPO")?.let { // TrueOG Bootstrap mavenLocal().
-        val dir = file(it)
-        if (dir.isDirectory) {
-            println("Using SELF_MAVEN_LOCAL_REPO at: $it")
-            maven { url = uri("file://${dir.absolutePath}") }
-        } else {
-            logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
-        }
-    } ?: logger.error("TrueOG Bootstrap not found, defaulting to ~/.m2 for mavenLocal()")
 }
 
 /* ---------------------- Java project deps ---------------------------- */
