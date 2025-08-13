@@ -9,4 +9,5 @@ public abstract interface GUIButton {
     public abstract boolean rightClick();
 
     public abstract boolean rightClickShift();
+
 }

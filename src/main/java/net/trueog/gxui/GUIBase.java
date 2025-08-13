@@ -68,6 +68,7 @@ public abstract class GUIBase implements Listener {
     private HashMap<Integer, Integer> itemTimings;
 
     public GUIBase(JavaPlugin plugin, Player player, String inventoryName, int inventorySize, boolean fillEmpty) {
+
         this.plugin = plugin;
         this.player = player;
         this.inventoryName = inventoryName;
@@ -82,18 +83,13 @@ public abstract class GUIBase implements Listener {
 
         itemErrors = new HashMap<>();
         itemTimings = new HashMap<>();
+
     }
 
-    public GUIBase(
-            JavaPlugin plugin,
-            Player player,
-            String inventoryName,
-            int inventorySize,
-            boolean fillEmpty,
-            Sound openSound,
-            float openSoundFloat,
-            Sound errorSound,
-            float errorSoundFloat) {
+    public GUIBase(JavaPlugin plugin, Player player, String inventoryName, int inventorySize, boolean fillEmpty,
+            Sound openSound, float openSoundFloat, Sound errorSound, float errorSoundFloat)
+    {
+
         this.plugin = plugin;
         this.player = player;
         this.inventoryName = inventoryName;
@@ -109,11 +105,15 @@ public abstract class GUIBase implements Listener {
 
         itemErrors = new HashMap<>();
         itemTimings = new HashMap<>();
+
     }
 
     public void open(boolean refresh) {
-        if (!isOpen) Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
-        if (openSound != null) player.playSound(player.getLocation(), openSound, 100f, openSoundFloat);
+
+        if (!isOpen)
+            Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+        if (openSound != null)
+            player.playSound(player.getLocation(), openSound, 100f, openSoundFloat);
         isOpen = true;
 
         Inventory playersInventory = player.getInventory();
@@ -125,31 +125,42 @@ public abstract class GUIBase implements Listener {
         setupItems();
 
         for (Map.Entry<Integer, GUIItem> i : inventoryContents.entrySet()) {
+
             inventory.setItem(i.getKey(), i.getValue().build());
+
         }
 
         if (fillEmpty) {
+
             for (int i = 0; i < inventorySize; i++) {
+
                 if (inventory.getItem(i) == null) {
+
                     inventory.setItem(i, fillSlot());
+
                 }
+
             }
+
         }
 
         player.openInventory(inventory);
 
         if (refresh) {
+
             new BukkitRunnable() {
 
                 @Override
                 public void run() {
-                    Inventory inventory =
-                            ((HumanEntity) player).getOpenInventory().getTopInventory();
+
+                    Inventory inventory = ((HumanEntity) player).getOpenInventory().getTopInventory();
                     Component inventoryTitle = player.getOpenInventory().title();
                     String inventoryTitleText = inventoryTitle.examinableName();
                     if (!inventoryTitleText.equalsIgnoreCase(inventoryName)) {
+
                         cancel();
                         return;
+
                     }
 
                     inventory.clear();
@@ -157,14 +168,11 @@ public abstract class GUIBase implements Listener {
                     setupItems();
                     int counter = 0;
                     for (Map.Entry<Integer, GUIItem> i : inventoryContents.entrySet()) {
+
                         if (itemErrors.containsKey(i.getKey())) {
 
-                            GUIItem error = new GUIItem(
-                                    Material.RED_STAINED_GLASS_PANE,
-                                    1,
-                                    addLinebreaks(itemErrors.get(i.getKey()), 30, "&7")
-                                            .get(counter),
-                                    "&c&lERROR");
+                            GUIItem error = new GUIItem(Material.RED_STAINED_GLASS_PANE, 1,
+                                    addLinebreaks(itemErrors.get(i.getKey()), 30, "&7").get(counter), "&c&lERROR");
 
                             counter++;
                             int tick = itemTimings.get(i.getKey());
@@ -173,87 +181,112 @@ public abstract class GUIBase implements Listener {
                             itemTimings.put(i.getKey(), tick);
 
                             if (tick >= 9) {
+
                                 itemErrors.remove(i.getKey());
                                 itemTimings.remove(i.getKey());
                                 inventory.setItem(i.getKey(), i.getValue().build());
                                 continue;
+
                             }
 
                             inventory.setItem(i.getKey(), error.build());
 
                             continue;
+
                         }
 
                         inventory.setItem(i.getKey(), i.getValue().build());
+
                     }
 
                     if (fillEmpty) {
+
                         for (int i = 0; i < inventorySize; i++) {
+
                             if (inventory.getItem(i) == null) {
+
                                 inventory.setItem(i, fillSlot());
+
                             }
+
                         }
+
                     }
+
                 }
+
             }.runTaskTimer(plugin, 0, 5);
+
         }
+
     }
 
     public abstract void setupItems();
 
     public static ArrayList<TextComponent> convertToTextComponents(List<String> stringList) {
+
         ArrayList<TextComponent> textComponents = new ArrayList<>();
 
         for (String str : stringList) {
-            TextComponent textComponent =
-                    LegacyComponentSerializer.legacyAmpersand().deserialize(str);
+
+            TextComponent textComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(str);
             textComponents.add(textComponent);
+
         }
 
         return textComponents;
+
     }
 
     public void addItem(Integer slot, GUIItem item) {
+
         inventoryContents.put(slot, item);
+
     }
 
     private ItemStack fillSlot() {
+
         ItemStack i = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1);
         ItemMeta m = i.getItemMeta();
-        TextComponent emptySlotDisplayName =
-                LegacyComponentSerializer.legacyAmpersand().deserialize(" ");
+        TextComponent emptySlotDisplayName = LegacyComponentSerializer.legacyAmpersand().deserialize(" ");
         m.displayName(emptySlotDisplayName);
         i.setItemMeta(m);
         return i;
+
     }
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent event) {
+
         if (event.getItemDrop().getItemStack().getItemMeta().isUnbreakable()) {
+
             event.setCancelled(true);
+
         }
+
     }
 
-    /*@EventHandler
-    public void inventoryClickHandler(InventoryClickEvent e) {
-        Player p = (Player) e.getWhoClicked();
-        Inventory i = e.getClickedInventory();
-        if(e.getCurrentItem().getItemMeta().isUnbreakable()) {
-            if(i.getTitle() != p.getInventory().getTitle()) {
-                e.setCancelled(true);
-            }
-        }
-    }*/
+    /*
+     * @EventHandler public void inventoryClickHandler(InventoryClickEvent e) {
+     * Player p = (Player) e.getWhoClicked(); Inventory i = e.getClickedInventory();
+     * if(e.getCurrentItem().getItemMeta().isUnbreakable()) { if(i.getTitle() !=
+     * p.getInventory().getTitle()) { e.setCancelled(true); } } }
+     */
 
     @EventHandler
     public void inventoryDragHandler(InventoryDragEvent event) {
+
         if (event.getCursor().getItemMeta().isUnbreakable()) {
+
             event.setCancelled(true);
+
         }
+
     }
 
     @EventHandler
     public void playerInventoryClickHandler(InventoryClickEvent event) {
+
         Player clickedPlayer = (Player) event.getWhoClicked();
         ClickType clickType = event.getClick();
         Inventory inventory = event.getClickedInventory();
@@ -261,63 +294,89 @@ public abstract class GUIBase implements Listener {
         Component inventoryName = event.getView().title();
         String inventoryTitleText = inventoryName.examinableName();
 
-        if (clickedPlayer != player) return;
+        if (clickedPlayer != player)
+            return;
 
-        if (inventory == null) return;
+        if (inventory == null)
+            return;
 
         if (inventoryTitleText.equalsIgnoreCase(inventoryName.examinableName())) {
+
             if (item == null || !item.hasItemMeta()) {
-                if (errorSound != null) player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
+
+                if (errorSound != null)
+                    player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
                 event.setCancelled(true);
                 return;
+
             }
 
             if (itemErrors.containsKey(event.getSlot())) {
+
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 50f, 0.7f);
                 event.setCancelled(true);
                 return;
+
             }
 
             if (inventoryContents.containsKey(event.getSlot())) {
+
                 GUIItem guiItem = inventoryContents.get(event.getSlot());
                 event.setCancelled(true);
 
                 if (!guiItem.isButton()) {
+
                     if (guiItem.isPlayErrorSound() && errorSound != null)
                         player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
                     event.setCancelled(true);
                     return;
+
                 }
 
                 boolean exec = guiItem.executeClick(clickType);
                 if (!exec) {
+
                     if (guiItem.isPlayErrorSound() && errorSound != null)
                         player.playSound(player.getLocation(), errorSound, 100f, errorSoundFloat);
+
                 }
+
             }
+
         }
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void close(InventoryCloseEvent event) {
+
         Player closer = (Player) event.getPlayer();
         Component inventoryTitle = player.getOpenInventory().title();
         String inventoryTitleText = inventoryTitle.examinableName();
         if (inventoryTitleText.equalsIgnoreCase(inventoryName) && isOpen) {
+
             if (closer == player) {
+
                 HandlerList.unregisterAll(this);
                 isOpen = false;
+
             }
+
         }
+
     }
 
     public void showErrorItem(Player player, Integer item, String error, boolean sound) {
+
         itemErrors.put(item, error);
         itemTimings.put(item, 0);
-        if (sound) player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
+        if (sound)
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
+
     }
 
     public ArrayList<String> addLinebreaks(String input, int maxLineLength, String toAppendAfterNewline) {
+
         ArrayList<String> result = new ArrayList<>();
 
         StringTokenizer tok = new StringTokenizer(input, " ");
@@ -325,19 +384,27 @@ public abstract class GUIBase implements Listener {
         output.insert(0, toAppendAfterNewline);
         int lineLen = 0;
         while (tok.hasMoreTokens()) {
+
             String word = tok.nextToken();
 
             if (lineLen + word.length() > maxLineLength) {
+
                 result.add(output.toString());
                 output = new StringBuilder();
                 output.append(toAppendAfterNewline);
                 lineLen = 0;
+
             }
+
             output.append(word).append(" ");
             lineLen += word.length();
+
         }
+
         result.add(output.toString());
 
         return result;
+
     }
+
 }

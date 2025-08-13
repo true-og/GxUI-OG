@@ -64,6 +64,7 @@ public class GUIItem {
         lore = new ArrayList<>();
         type = -1;
         playErrorSound = true;
+
     }
 
     public GUIItem(Material item) {
@@ -75,6 +76,7 @@ public class GUIItem {
         lore = new ArrayList<>();
         type = -1;
         playErrorSound = true;
+
     }
 
     public GUIItem(GUIButton guibutton) {
@@ -84,6 +86,7 @@ public class GUIItem {
         lore = new ArrayList<>();
         type = -1;
         playErrorSound = true;
+
     }
 
     public GUIItem(Material item, int amount, String displayName) {
@@ -95,6 +98,7 @@ public class GUIItem {
         lore = new ArrayList<>();
         type = -1;
         playErrorSound = true;
+
     }
 
     public GUIItem(Material item, int amount, String displayName, String skullOwner) {
@@ -108,6 +112,7 @@ public class GUIItem {
         lore = new ArrayList<>();
         type = -1;
         playErrorSound = true;
+
     }
 
     public GUIItem(Material item, int amount, GUIButton button, String displayName, String skullOwner) {
@@ -122,16 +127,19 @@ public class GUIItem {
         lore = new ArrayList<>();
         type = -1;
         playErrorSound = true;
+
     }
 
     public GUIButton getButton() {
 
         return button;
+
     }
 
     public void setButton(GUIButton button) {
 
         this.button = button;
+
     }
 
     /**
@@ -154,12 +162,14 @@ public class GUIItem {
                 } else {
 
                     i = new ItemStack(item, amount);
+
                 }
 
                 ItemMeta m = i.getItemMeta();
                 if (!displayName.equals("Not Set")) {
 
                     m.displayName(displayNameTextComponent);
+
                 }
 
                 m.lore(loreTextComponent);
@@ -169,7 +179,9 @@ public class GUIItem {
                     for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet()) {
 
                         m.addEnchant(e.getKey(), e.getValue(), true);
+
                     }
+
                 }
 
                 i.setItemMeta(m);
@@ -184,11 +196,13 @@ public class GUIItem {
                 if (!displayName.equals("Not Set")) {
 
                     m.displayName(displayNameTextComponent);
+
                 }
 
                 i.setUnbreakable(unbreakable);
                 m.lore(loreTextComponent);
                 i.setItemMeta(m);
+
             }
 
         } catch (Exception error) {
@@ -196,29 +210,35 @@ public class GUIItem {
             error.printStackTrace();
 
             return new ItemStack(Material.DIRT);
+
         }
 
         return i;
+
     }
 
     public boolean isPlayErrorSound() {
 
         return playErrorSound;
+
     }
 
     public void setPlayErrorSound(boolean playErrorSound) {
 
         this.playErrorSound = playErrorSound;
+
     }
 
     public boolean isButton() {
 
         return !(button == null);
+
     }
 
     public boolean executeClick(ClickType clickType) {
 
         switch (clickType) {
+
             case LEFT:
                 return button.leftClick();
             case SHIFT_LEFT:
@@ -229,7 +249,9 @@ public class GUIItem {
                 return button.rightClickShift();
             default:
                 return false;
+
         }
+
     }
 
     public GUIItem enchantment(Enchantment ench, Integer level) {
@@ -237,15 +259,19 @@ public class GUIItem {
         if (enchantments == null) {
 
             enchantments = new HashMap<>();
+
         }
 
         enchantments.put(ench, level);
 
         return this;
+
     }
 
     public GUIItem duplicateByConstructor() {
 
         return new GUIItem(item, amount, displayName);
+
     }
+
 }
