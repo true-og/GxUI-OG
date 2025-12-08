@@ -1,3 +1,7 @@
 # GxUI-OG
 
-My GUI Lib. To use, use the following repo URL: `https://repo.hotten.cloud/releases`, the following package: `uk.hotten.gxui`, and artifact: `gxui:1.3.1`.
+[TrueOG Network](https://true-og.net)'s GUI Library, originally written by @Gxorge.
+
+See [Template-OG](https://github.com/true-og/Template-OG) for a usage and import example.
+
+Public domain.
