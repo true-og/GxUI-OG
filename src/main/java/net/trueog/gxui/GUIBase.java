@@ -289,24 +289,28 @@ public abstract class GUIBase implements Listener {
 
         Player clickedPlayer = (Player) event.getWhoClicked();
         ClickType clickType = event.getClick();
-        Inventory inventory = event.getClickedInventory();
+        Inventory clickedInventory = event.getClickedInventory();
         ItemStack item = event.getCurrentItem();
-        Component inventoryName = event.getView().title();
-        String inventoryTitleText = inventoryName.examinableName();
+        Inventory topInventory = event.getView().getTopInventory();
 
         if (clickedPlayer != player)
             return;
 
-        if (inventory == null)
+        if (clickedInventory == null)
             return;
 
-        if (inventoryTitleText.equalsIgnoreCase(inventoryName.examinableName())) {
+        if (topInventory != inventory)
+            return;
+
+        // Prevent taking or moving placeholders/GUI items from this GUI.
+        if (event.getRawSlot() < topInventory.getSize()) {
+
+            event.setCancelled(true);
 
             if (item == null || !item.hasItemMeta()) {
 
                 if (errorSound != null)
                     player.playSound(player.getLocation(), errorSound, 50f, errorSoundFloat);
-                event.setCancelled(true);
                 return;
 
             }
@@ -322,7 +326,6 @@ public abstract class GUIBase implements Listener {
             if (inventoryContents.containsKey(event.getSlot())) {
 
                 GUIItem guiItem = inventoryContents.get(event.getSlot());
-                event.setCancelled(true);
 
                 if (!guiItem.isButton()) {
 
@@ -342,6 +345,14 @@ public abstract class GUIBase implements Listener {
                 }
 
             }
+
+            return;
+
+        }
+
+        if (event.isShiftClick()) {
+
+            event.setCancelled(true);
 
         }
 
