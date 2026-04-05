@@ -3,12 +3,7 @@ package net.trueog.gxui;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.Accessors;
-import net.kyori.adventure.text.TextComponent;
-import net.trueog.utilitiesog.UtilitiesOG;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -16,6 +11,12 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import net.kyori.adventure.text.TextComponent;
+import net.trueog.utilitiesog.UtilitiesOG;
 
 @Accessors(fluent = true)
 public class GUIItem {
@@ -34,7 +35,7 @@ public class GUIItem {
 
     @Getter
     @Setter
-    private ArrayList<String> lore;
+    private List<TextComponent> lore;
 
     private boolean isSkull;
     private String skullOwner;
@@ -147,26 +148,17 @@ public class GUIItem {
      */
     public ItemStack build() {
 
-        ItemStack i;
-        TextComponent displayNameTextComponent = UtilitiesOG.trueogExpand(displayName);
-        List<TextComponent> loreTextComponent = GUIBase.convertToTextComponents(lore);
+        final ItemStack i;
+        final TextComponent displayNameTextComponent = UtilitiesOG.trueogExpand(displayName);
+        final List<TextComponent> loreTextComponent = lore;
         try {
 
             if (!isSkull) {
 
-                if (type != -1) {
+                i = type != -1 ? new ItemStack(item, amount) : new ItemStack(item, amount);
 
-                    // TODO: shorts?
-                    i = new ItemStack(item, amount);
-
-                } else {
-
-                    i = new ItemStack(item, amount);
-
-                }
-
-                ItemMeta m = i.getItemMeta();
-                if (!displayName.equals("Not Set")) {
+                final ItemMeta m = i.getItemMeta();
+                if (!"Not Set".equals(displayName)) {
 
                     m.displayName(displayNameTextComponent);
 
@@ -176,11 +168,7 @@ public class GUIItem {
 
                 if (!enchantments.isEmpty()) {
 
-                    for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet()) {
-
-                        m.addEnchant(e.getKey(), e.getValue(), true);
-
-                    }
+                    enchantments.entrySet().forEach(e -> m.addEnchant(e.getKey(), e.getValue(), true));
 
                 }
 
@@ -189,11 +177,11 @@ public class GUIItem {
             } else {
 
                 i = new ItemStack(item, amount);
-                SkullMeta m = (SkullMeta) i.getItemMeta();
+                final SkullMeta m = (SkullMeta) i.getItemMeta();
 
                 m.setOwningPlayer(Bukkit.getOfflinePlayer(skullOwner));
 
-                if (!displayName.equals("Not Set")) {
+                if (!"Not Set".equals(displayName)) {
 
                     m.displayName(displayNameTextComponent);
 
@@ -237,20 +225,15 @@ public class GUIItem {
 
     public boolean executeClick(ClickType clickType) {
 
-        switch (clickType) {
+        return switch (clickType) {
 
-            case LEFT:
-                return button.leftClick();
-            case SHIFT_LEFT:
-                return button.leftClickShift();
-            case RIGHT:
-                return button.rightClick();
-            case SHIFT_RIGHT:
-                return button.rightClickShift();
-            default:
-                return false;
+            case LEFT -> button.leftClick();
+            case SHIFT_LEFT -> button.leftClickShift();
+            case RIGHT -> button.rightClick();
+            case SHIFT_RIGHT -> button.rightClickShift();
+            default -> false;
 
-        }
+        };
 
     }
 

@@ -2,12 +2,12 @@ package net.trueog.gxui;
 
 public abstract interface GUIButton {
 
-    public abstract boolean leftClick();
+    abstract boolean leftClick();
 
-    public abstract boolean leftClickShift();
+    abstract boolean leftClickShift();
 
-    public abstract boolean rightClick();
+    abstract boolean rightClick();
 
-    public abstract boolean rightClickShift();
+    abstract boolean rightClickShift();
 
 }
