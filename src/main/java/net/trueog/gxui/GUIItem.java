@@ -16,7 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.kyori.adventure.text.TextComponent;
-import net.trueog.utilitiesog.UtilitiesOG;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 @Accessors(fluent = true)
 public class GUIItem {
@@ -149,7 +149,8 @@ public class GUIItem {
     public ItemStack build() {
 
         final ItemStack i;
-        final TextComponent displayNameTextComponent = UtilitiesOG.trueogExpand(displayName);
+        final TextComponent displayNameTextComponent = LegacyComponentSerializer.legacyAmpersand()
+                .deserialize(displayName);
         final List<TextComponent> loreTextComponent = lore;
         try {
 

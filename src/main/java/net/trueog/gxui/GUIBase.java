@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -28,7 +27,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -162,17 +160,15 @@ public abstract class GUIBase implements Listener {
                 @Override
                 public void run() {
 
-                    final Inventory inventory = ((HumanEntity) player).getOpenInventory().getTopInventory();
-                    final Component inventoryTitle = player.getOpenInventory().title();
-                    final String inventoryTitleText = inventoryTitle.examinableName();
-                    if (!StringUtils.equalsIgnoreCase(inventoryTitleText, inventoryName)) {
+                    final Inventory openInventory = ((HumanEntity) player).getOpenInventory().getTopInventory();
+                    if (openInventory != inventory) {
 
                         cancel();
                         return;
 
                     }
 
-                    inventory.clear();
+                    openInventory.clear();
                     inventoryContents.clear();
                     setupItems();
                     int counter = 0;
@@ -194,18 +190,18 @@ public abstract class GUIBase implements Listener {
 
                                 itemErrors.remove(i.getKey());
                                 itemTimings.remove(i.getKey());
-                                inventory.setItem(i.getKey(), i.getValue().build());
+                                openInventory.setItem(i.getKey(), i.getValue().build());
                                 continue;
 
                             }
 
-                            inventory.setItem(i.getKey(), error.build());
+                            openInventory.setItem(i.getKey(), error.build());
 
                             continue;
 
                         }
 
-                        inventory.setItem(i.getKey(), i.getValue().build());
+                        openInventory.setItem(i.getKey(), i.getValue().build());
 
                     }
 
@@ -213,9 +209,9 @@ public abstract class GUIBase implements Listener {
 
                         for (int i = 0; i < inventorySize; i++) {
 
-                            if (inventory.getItem(i) == null) {
+                            if (openInventory.getItem(i) == null) {
 
-                                inventory.setItem(i, fillSlot());
+                                openInventory.setItem(i, fillSlot());
 
                             }
 
@@ -368,10 +364,7 @@ public abstract class GUIBase implements Listener {
     public void close(InventoryCloseEvent event) {
 
         final Player closer = (Player) event.getPlayer();
-        final Component inventoryTitle = player.getOpenInventory().title();
-        final String inventoryTitleText = inventoryTitle.examinableName();
-        final boolean condition = StringUtils.equalsIgnoreCase(inventoryTitleText, inventoryName) && isOpen
-                && closer == player;
+        final boolean condition = event.getInventory() == inventory && isOpen && closer == player;
         if (!condition) {
 
             return;
