@@ -6,7 +6,7 @@ import org.bukkit.Material;
 public enum AdvancementState {
 
     COMPLETE(Material.LIME_WOOL, "&a", "&aCompleted"), IN_PROGRESS(Material.YELLOW_WOOL, "&e", "&eIn Progress"),
-    LOCKED(Material.GRAY_WOOL, "&7", "&7Locked");
+    LOCKED(Material.RED_WOOL, "&c", "&cLocked");
 
     private final Material defaultMaterial;
     private final String color;

@@ -266,10 +266,10 @@ public class AdvancementMenu extends GUIBase {
     private static List<Integer> createAdvancementSlots() {
 
         final List<Integer> slots = new ArrayList<>(ADVANCEMENTS_PER_PAGE);
-        // Column-first ordering matches "start top-left and go down".
-        for (int column = 0; column < 9; column++) {
+        // Row-first ordering: fill left-to-right across the top row, then wrap down.
+        for (int row = 0; row < 5; row++) {
 
-            for (int row = 0; row < 5; row++) {
+            for (int column = 0; column < 9; column++) {
 
                 slots.add(row * 9 + column);
 
