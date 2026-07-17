@@ -73,34 +73,48 @@ Notes:
 * A `GUIButton` method should return `true` when the click was handled.
 * Non-button items can call `item.playErrorSound(false)` to make clicks silent.
 
-## Advancement API
+## Progress menu API
 
-`AdvancementMenu` displays an ordered list of read-only advancement items in a paginated inventory. Items are placed
-from the top-left slot downward through each column, reserving the bottom row for previous, close, and next controls.
+`ProgressMenu` displays a layered, read-only progress inventory. The first layer lists sections. Clicking a section
+opens a second layer containing one material-backed item per goal. Hovering a goal shows its completion state and,
+for counter goals, its current and target values. Both layers paginate automatically.
 
 Java:
 
 ```java
-Map<String, List<String>> values = new LinkedHashMap<>();
-values.put("&cHome Two", List.of("&7Unlock the second home.", "&eRequired: &fWin 1 duel"));
-values.put("&cHome Three", List.of("&7Unlock the third home.", "&eRequired: &fBuild a full beacon"));
+ProgressMenu.builder(plugin, player, "&aHome Quests")
+    .section("Home 2 Quest", ProgressMenu.State.IN_PROGRESS)
+        .progress(Material.DIAMOND, "Total Shards", 450, 900)
+        .progress(Material.CLOCK, "Hours Played", 12, 24)
+        .description("&7Use &e/claimquest &7when ready.")
+    .section("Home 6 Quest", ProgressMenu.State.NOT_STARTED)
+        .goal(Material.RED_CONCRETE, "How Did We Get Here?", false)
+    .open();
+```
 
-AdvancementMenu.open(plugin, player, "&6Advancements", values);
+Required imports:
+
+```java
+import net.trueog.gxui.progress.ProgressMenu;
+import org.bukkit.Material;
 ```
 
 Kotlin:
 
 ```kotlin
-val values = linkedMapOf(
-    "&cHome Two" to listOf("&7Unlock the second home.", "&eRequired: &fWin 1 duel"),
-    "&cHome Three" to listOf("&7Unlock the third home.", "&eRequired: &fBuild a full beacon"),
-)
-
-AdvancementMenu.open(plugin, player, "&6Advancements", values)
+ProgressMenu.builder(plugin, player, "&aHome Quests")
+    .section("Home 2 Quest", ProgressMenu.State.IN_PROGRESS)
+    .progress(Material.DIAMOND, "Total Shards", 450, 900)
+    .progress(Material.CLOCK, "Hours Played", 12, 24)
+    .description("&7Use &e/claimquest &7when ready.")
+    .section("Home 6 Quest", ProgressMenu.State.NOT_STARTED)
+    .goal(Material.RED_CONCRETE, "How Did We Get Here?", false)
+    .open()
 ```
 
-The simple map API displays every entry as `RED_WOOL`. Use an ordered map, such as `LinkedHashMap`, when item order
-matters. Callers that need custom state or icons can still pass `List<AdvancementItem>` directly.
+Section icons are always state wool: red for `NOT_STARTED`, yellow for `IN_PROGRESS`, and lime for `COMPLETE`. Goal
+icons never change with state; completion is communicated through the display name and hover lore. This keeps each
+block related to the goal it represents while making the first layer immediately scannable.
 
 ## License
 
