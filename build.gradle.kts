@@ -32,7 +32,7 @@ kotlin { jvmToolchain(17) }
 /* ----------------------------- Metadata ------------------------------ */
 group = "net.trueog.gxui-og" // Declare bundle identifier.
 
-version = "2.0.0" // Declare plugin version (will be in .jar).
+version = "2.1.0" // Declare plugin version (will be in .jar).
 
 val apiVersion = "1.19" // Declare minecraft server target version.
 

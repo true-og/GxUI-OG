@@ -4,9 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.kyori.adventure.text.Component;
@@ -16,7 +21,8 @@ import net.trueog.gxui.GUIBase;
 import net.trueog.gxui.GUIButton;
 import net.trueog.gxui.GUIItem;
 
-// A read-only, layered inventory for groups of material-backed goals.
+// A layered inventory for groups of material-backed goals. Goals are read-only; a
+// section may expose one clickable action button on its detail view.
 public final class ProgressMenu extends GUIBase {
 
     public static final int INVENTORY_SIZE = 54;
@@ -25,7 +31,11 @@ public final class ProgressMenu extends GUIBase {
     public static final int PREVIOUS_PAGE_SLOT = 47;
     public static final int CLOSE_SLOT = 49;
     public static final int NEXT_PAGE_SLOT = 51;
+    public static final int ACTION_SLOT = 52;
     public static final int INFORMATION_SLOT = 53;
+
+    // How long the action slot shows an error before the action button returns.
+    private static final long ACTION_ERROR_TICKS = 40L;
 
     private static final List<Integer> CONTENT_SLOTS = createContentSlots();
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacyAmpersand();
@@ -35,6 +45,9 @@ public final class ProgressMenu extends GUIBase {
     private final List<Section> sections;
     private final int sectionIndex;
     private final int page;
+
+    // True while the action slot displays an error item; clicks on it are ignored.
+    private boolean actionErrorActive = false;
 
     private ProgressMenu(JavaPlugin plugin, Player player, String baseTitle, List<Section> sections, int sectionIndex,
             int page)
@@ -126,6 +139,65 @@ public final class ProgressMenu extends GUIBase {
 
         }
 
+        if (section.action() != null) {
+
+            addItem(ACTION_SLOT, buildActionItem(section.action()));
+
+        }
+
+    }
+
+    // Temporarily replace this detail view's action button with an error item.
+    // Main thread only; a no-op once the menu is closed.
+    public void showActionError(String message) {
+
+        Objects.requireNonNull(message, "message");
+
+        if (!isDetailView()) {
+
+            return;
+
+        }
+
+        final Action action = sections.get(sectionIndex).action();
+        final Inventory inventory = getInventory();
+        if (action == null || inventory == null || !isViewing(inventory)) {
+
+            return;
+
+        }
+
+        actionErrorActive = true;
+
+        final GUIItem errorItem = new GUIItem(Material.RED_STAINED_GLASS_PANE, 1, "&c&lError");
+        errorItem.lore(toLoreComponents(addLinebreaks(message, 30, "&7")));
+        inventory.setItem(ACTION_SLOT, errorItem.build());
+        playActionErrorSound();
+
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+
+            actionErrorActive = false;
+
+            if (isViewing(inventory)) {
+
+                inventory.setItem(ACTION_SLOT, buildActionItem(action).build());
+
+            }
+
+        }, ACTION_ERROR_TICKS);
+
+    }
+
+    private boolean isViewing(Inventory inventory) {
+
+        return getPlayer().getOpenInventory().getTopInventory() == inventory;
+
+    }
+
+    private void playActionErrorSound() {
+
+        getPlayer().playSound(getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 100f, 0.7f);
+
     }
 
     private void setupNavigationItems() {
@@ -211,6 +283,30 @@ public final class ProgressMenu extends GUIBase {
 
         guiItem.lore(toLoreComponents(section.description()));
         guiItem.playErrorSound(false);
+
+        return guiItem;
+
+    }
+
+    private GUIItem buildActionItem(Action action) {
+
+        final GUIItem guiItem = new GUIItem(action.material(), 1, action.name());
+
+        guiItem.lore(toLoreComponents(action.lore()));
+        guiItem.playErrorSound(false);
+        guiItem.button(createButton(() -> {
+
+            if (actionErrorActive) {
+
+                playActionErrorSound();
+
+                return;
+
+            }
+
+            action.handler().accept(this, getPlayer());
+
+        }));
 
         return guiItem;
 
@@ -469,7 +565,23 @@ public final class ProgressMenu extends GUIBase {
 
     }
 
-    private record Section(String name, State state, List<Goal> goals, List<String> description) {
+    // A clickable button shown at ACTION_SLOT on a section's detail view.
+    private record Action(Material material, String name, List<String> lore, BiConsumer<ProgressMenu, Player> handler) {
+
+        private Action {
+
+            Objects.requireNonNull(material, "material");
+            Objects.requireNonNull(name, "name");
+            Objects.requireNonNull(handler, "handler");
+
+            lore = List.copyOf(Objects.requireNonNull(lore, "lore"));
+
+        }
+
+    }
+
+    // action is null when the section has no button.
+    private record Section(String name, State state, List<Goal> goals, List<String> description, Action action) {
 
         private Section {
 
@@ -495,6 +607,7 @@ public final class ProgressMenu extends GUIBase {
         private State pendingState;
         private List<Goal> pendingGoals;
         private List<String> pendingDescription;
+        private Action pendingAction;
 
         private Builder(JavaPlugin plugin, Player player, String title) {
 
@@ -514,6 +627,7 @@ public final class ProgressMenu extends GUIBase {
             pendingState = Objects.requireNonNull(state, "state");
             pendingGoals = new ArrayList<>();
             pendingDescription = new ArrayList<>();
+            pendingAction = null;
 
             return this;
 
@@ -550,12 +664,51 @@ public final class ProgressMenu extends GUIBase {
 
         }
 
+        // Give the current section one clickable button at ACTION_SLOT of its detail
+        // view; calling it again replaces the button. The handler receives the clicked
+        // menu instance so it can call showActionError.
+        public Builder action(Material material, String name, List<String> lore,
+                BiConsumer<ProgressMenu, Player> handler)
+        {
+
+            requirePending();
+
+            pendingAction = new Action(material, name, lore, handler);
+
+            return this;
+
+        }
+
+        public Builder action(Material material, String name, List<String> lore, Consumer<Player> handler) {
+
+            Objects.requireNonNull(handler, "handler");
+
+            return action(material, name, lore, (menu, clicker) -> handler.accept(clicker));
+
+        }
+
         // Open the first-layer section.
         public ProgressMenu open() {
 
             flushPending();
 
-            final ProgressMenu menu = new ProgressMenu(plugin, player, title, List.copyOf(sections), -1, 0);
+            return openAt(-1);
+
+        }
+
+        // Open straight into one section's detail view (0-indexed, in the order the
+        // sections were added). Out-of-range indexes fall back to the first layer.
+        public ProgressMenu openSection(int sectionIndex) {
+
+            flushPending();
+
+            return openAt(sectionIndex);
+
+        }
+
+        private ProgressMenu openAt(int sectionIndex) {
+
+            final ProgressMenu menu = new ProgressMenu(plugin, player, title, List.copyOf(sections), sectionIndex, 0);
             menu.open(false);
 
             return menu;
@@ -580,12 +733,13 @@ public final class ProgressMenu extends GUIBase {
 
             }
 
-            sections.add(new Section(pendingName, pendingState, pendingGoals, pendingDescription));
+            sections.add(new Section(pendingName, pendingState, pendingGoals, pendingDescription, pendingAction));
 
             pendingName = null;
             pendingState = null;
             pendingGoals = null;
             pendingDescription = null;
+            pendingAction = null;
 
         }
 

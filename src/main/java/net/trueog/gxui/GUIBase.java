@@ -60,6 +60,7 @@ public abstract class GUIBase implements Listener {
     @Getter
     private final Player player;
 
+    @Getter
     private Inventory inventory;
 
     // Prevents accidental deregistration from other GUIs that have the same name.

@@ -75,9 +75,10 @@ Notes:
 
 ## Progress menu API
 
-`ProgressMenu` displays a layered, read-only progress inventory. The first layer lists sections. Clicking a section
-opens a second layer containing one material-backed item per goal. Hovering a goal shows its completion state and,
-for counter goals, its current and target values. Both layers paginate automatically.
+`ProgressMenu` displays a layered progress inventory. The first layer lists sections. Clicking a section opens a
+second layer containing one material-backed item per goal. Hovering a goal shows its completion state and, for
+counter goals, its current and target values. Both layers paginate automatically. Goals themselves are read-only;
+a section may optionally expose one clickable action button on its detail view.
 
 Java:
 
@@ -86,7 +87,15 @@ ProgressMenu.builder(plugin, player, "&aHome Quests")
     .section("Home 2 Quest", ProgressMenu.State.IN_PROGRESS)
         .progress(Material.DIAMOND, "Total Shards", 450, 900)
         .progress(Material.CLOCK, "Hours Played", 12, 24)
-        .description("&7Use &e/claimquest &7when ready.")
+        .description("&7Click &aClaim &7when ready.")
+        .action(Material.NETHER_STAR, "&aClaim Quest", List.of("&7Claims this quest."), (menu, clicker) -> {
+            if (!canClaim(clicker)) {
+                menu.showActionError("You must meet all requirements first.");
+                return;
+            }
+            claim(clicker);
+            clicker.closeInventory();
+        })
     .section("Home 6 Quest", ProgressMenu.State.NOT_STARTED)
         .goal(Material.RED_CONCRETE, "How Did We Get Here?", false)
     .open();
@@ -95,6 +104,7 @@ ProgressMenu.builder(plugin, player, "&aHome Quests")
 Required imports:
 
 ```java
+import java.util.List;
 import net.trueog.gxui.progress.ProgressMenu;
 import org.bukkit.Material;
 ```
@@ -106,11 +116,33 @@ ProgressMenu.builder(plugin, player, "&aHome Quests")
     .section("Home 2 Quest", ProgressMenu.State.IN_PROGRESS)
     .progress(Material.DIAMOND, "Total Shards", 450, 900)
     .progress(Material.CLOCK, "Hours Played", 12, 24)
-    .description("&7Use &e/claimquest &7when ready.")
+    .description("&7Click &aClaim &7when ready.")
+    .action(Material.NETHER_STAR, "&aClaim Quest", listOf("&7Claims this quest.")) { menu, clicker ->
+        if (!canClaim(clicker)) {
+            menu.showActionError("You must meet all requirements first.")
+        } else {
+            claim(clicker)
+            clicker.closeInventory()
+        }
+    }
     .section("Home 6 Quest", ProgressMenu.State.NOT_STARTED)
     .goal(Material.RED_CONCRETE, "How Did We Get Here?", false)
-    .open()
+    .openSection(0) // Open straight into "Home 2 Quest"; use open() for the section list.
 ```
+
+### Actions
+
+- `action(material, name, lore, handler)` gives the current section one button, rendered at `ProgressMenu.ACTION_SLOT`
+  (slot 52, bottom row) on that section's detail view only. Calling it again for the same section replaces the button.
+  `handler` is either a `BiConsumer<ProgressMenu, Player>` or a `Consumer<Player>`; in Kotlin the lambda's arity picks
+  the overload. Every page change creates a fresh `ProgressMenu`, so use the `menu` argument (not a captured instance)
+  when you need to talk back to the open inventory.
+- `openSection(index)` opens the builder directly in the detail view of the `index`-th section (0-based, in the order
+  they were added). Out-of-range indexes fall back to the first layer. The Back button still returns to the section
+  list.
+- `menu.showActionError(message)` swaps the action button for a red "Error" pane carrying `message` for about two
+  seconds, plays an error sound, and ignores clicks on the slot until the button returns. Call it on the main thread
+  while the menu is still open; otherwise it does nothing.
 
 Section icons are always state wool: red for `NOT_STARTED`, yellow for `IN_PROGRESS`, and lime for `COMPLETE`. Goal
 icons never change with state; completion is communicated through the display name and hover lore. This keeps each
