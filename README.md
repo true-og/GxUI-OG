@@ -10,10 +10,10 @@ See [Template-OG](https://git.trueog.net/trueog/Template-OG) or [KotlinTemplate-
 
 ## Plugins using GxUI-OG
 
-[DuelEnhancer-OG](https://github.com/true-og/duelenhancer-og)
-[Splegg-OG](https://github.com/true-og/splegg-og)
-[SudoSigns-OG](https://github.com/true-og/sudosigns-og)
-[TheHerobrine-OG](https://github.com/true-og/TheHerobrine-OG/)
+[DuelEnhancer-OG](https://git.trueog.net/trueog/DuelEnhancer-OG)
+[Splegg-OG](https://git.trueog.net/trueog/Splegg-OG)
+[SudoSigns-OG](https://git.trueog.net/trueog/SudoSigns-OG)
+[TheHerobrine-OG](https://git.trueog.net/trueog/TheHerobrine-OG/)
 
 ## Core GUI API
 
